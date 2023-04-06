@@ -1,7 +1,5 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 
 class ScaleText extends StatelessWidget {
   List<AnimatedText> text;
@@ -33,6 +31,5 @@ class ScaleText extends StatelessWidget {
         ),
       ],
     );
-    ;
   }
 }

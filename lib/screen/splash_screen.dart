@@ -6,21 +6,23 @@ import 'package:restaurant_app/widget/lottie_files.dart';
 import 'package:restaurant_app/widget/scale_text.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  int _currentSlogan = 0;
+  final int _currentSlogan = 0;
 
   @override
   void initState() {
     super.initState();
 
-    Timer(Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => HomePage()));
+          context, MaterialPageRoute(builder: (context) => const HomePage()));
     });
   }
 
@@ -34,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen>
           children: [
             LottieFile(asset: "assets/splash-logo.json"),
             // Animasi nama restaurant
-            Text(
+            const Text(
               "Eatsie",
               style: TextStyle(
                 fontSize: 50.0,
@@ -42,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen>
                 color: Colors.orange,
               ),
             ),
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             // Selogan restaurant
             ScaleText(text: [
               ScaleAnimatedText("MURAH"),

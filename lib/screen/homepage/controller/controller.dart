@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:restaurant_app/data/model/restaurant_model.dart';
 
 class HomeController {
   Future<String> _loadRestaurantData() async {
@@ -11,8 +12,8 @@ class HomeController {
     return jsonRestaurantData;
   }
 
-  List<dynamic> sortFavorite(list_array) {
-    List<dynamic> data = List.from(list_array);
+  List<Restaurant> sortFavorite(listArray) {
+    List<Restaurant> data = List.from(listArray);
     data.sort((a, b) => b.rating.compareTo(a.rating));
     return data;
   }

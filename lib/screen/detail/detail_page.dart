@@ -6,14 +6,14 @@ import 'package:restaurant_app/data/model/restaurant_model.dart';
 class DetailPage extends StatelessWidget {
   final Restaurant restaurant;
 
-  DetailPage({required this.restaurant});
+  const DetailPage({super.key, required this.restaurant});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text('Detail Page'),
+        title: const Text('Detail Page'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -34,7 +34,7 @@ class DetailPage extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -60,7 +60,7 @@ class DetailPage extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Icon(Icons.star, color: Colors.amber, size: 18),
+                            const Icon(Icons.star, color: Colors.amber, size: 18),
                             Text(
                               "(${restaurant.rating.toString()})",
                               style: TextStyle(fontSize: 18.sp),
@@ -74,7 +74,7 @@ class DetailPage extends StatelessWidget {
                   SizedBox(
                     height: 1.h,
                   ),
-                  Text(
+                  const Text(
                     'Description:',
                     style: TextStyle(
                       fontSize: 18,
@@ -83,39 +83,39 @@ class DetailPage extends StatelessWidget {
                   ),
                   Text(
                     restaurant.description,
-                    style: TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16),
                     textAlign: TextAlign.justify,
                   ),
-                  SizedBox(height: 16),
-                  Text(
+                  const SizedBox(height: 16),
+                  const Text(
                     'Menu:',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Container(
+                  const SizedBox(height: 8),
+                  SizedBox(
                     height: 100,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: restaurant.menus.length,
                       itemBuilder: (context, index) {
-                        return Container(
+                        return SizedBox(
                           width: 40.w,
                           height: 10.w,
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Card(
                               color: Colors.orange,
                               child: Padding(
-                                padding: EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
                                       restaurant.menus[index],
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
@@ -131,36 +131,36 @@ class DetailPage extends StatelessWidget {
                       },
                     ),
                   ),
-                  SizedBox(height: 16),
-                  Text(
+                  const SizedBox(height: 16),
+                  const Text(
                     'Drinks:',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Container(
+                  const SizedBox(height: 8),
+                  SizedBox(
                     height: 100,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: restaurant.drinks.length,
                       itemBuilder: (context, index) {
-                        return Container(
+                        return SizedBox(
                           width: 40.w,
                           height: 10.w,
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Card(
                               color: Colors.orange,
                               child: Padding(
-                                padding: EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
                                       restaurant.drinks[index],
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
@@ -197,7 +197,7 @@ Widget _buildMenuCard(String menu) {
     child: Center(
       child: Text(
         menu,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 16,
           fontWeight: FontWeight.bold,
@@ -219,7 +219,7 @@ Widget _buildDrinkCard(String drink) {
     child: Center(
       child: Text(
         drink,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 16,
           fontWeight: FontWeight.bold,

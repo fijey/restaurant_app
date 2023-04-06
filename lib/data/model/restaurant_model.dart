@@ -20,23 +20,25 @@ class Restaurant {
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
-    var categoryList = json['menus'];
-    var menus = categoryList['foods']
-        .map((category) => category['name'] as String)
-        .toList();
+    Map<String, dynamic> menus = json['menus'] ?? {};
 
-    var drinks = categoryList['drinks']
-        .map((category) => category['name'] as String)
-        .toList();
+    var foods = menus.containsKey('foods')
+        ? menus['foods'].map((key) => key['name'] as String).toList()
+        : [];
+
+    var drinks = menus.containsKey('drinks')
+        ? menus['drinks'].map((key) => key['name'] as String).toList()
+        : [];
 
     return Restaurant(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
-      pictureId: json['pictureId'] as String,
+      pictureId:
+          "https://restaurant-api.dicoding.dev/images/medium/${json['pictureId'] as String}",
       city: json['city'] as String,
       rating: (json['rating'] as num).toDouble(),
-      menus: menus,
+      menus: foods,
       drinks: drinks,
     );
   }

@@ -2,21 +2,25 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:restaurant_app/common/card_decoration.dart';
+import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/data/model/restaurant_model.dart';
+import 'package:restaurant_app/data/provider/restaurant_provider.dart';
 import 'package:restaurant_app/screen/detail/detail_page.dart';
 import 'package:restaurant_app/screen/homepage/controller/controller.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   List<dynamic> _restaurantList = [];
-  List<dynamic> _restaurantFavorite = [];
+  final List<dynamic> _restaurantFavorite = [];
   HomeController controller = HomeController();
 
   @override
@@ -41,23 +45,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     // TODO: Implement widget build
-    List<dynamic> favoriteRestaurants =
-        controller.sortFavorite(_restaurantList).take(3).toList();
-
-// Step 1: Buat list baru sebagai data sumber daftar mitra
-    List<dynamic> _restaurantListFiltered = List.from(_restaurantList);
-
-// Step 2: Hapus item-item favorit dari _restaurantListFiltered
-    _restaurantListFiltered
-        .removeWhere((restaurant) => favoriteRestaurants.contains(restaurant));
-
     return Scaffold(
       body: SafeArea(
         child: Stack(
           children: [
             Container(
               height: 20.h,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.orange,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(50),
@@ -65,285 +59,343 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Container(
-                margin: EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Text(
-                      'Selamat Datang Fajar',
-                      textAlign: TextAlign.start,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 255, 255, 255),
-                        fontStyle: FontStyle.italic,
-                        shadows: [
-                          Shadow(
-                            color: Colors.grey,
-                            blurRadius: 2,
-                            offset: Offset(1, 1),
-                          ),
-                        ],
+            ChangeNotifierProvider<RestaurantProvider>(
+              create: (context) => RestaurantProvider(apiService: ApiService()),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Container(
+                  margin: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Selamat Datang Fajar',
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          fontStyle: FontStyle.italic,
+                          shadows: [
+                            Shadow(
+                              color: Colors.grey,
+                              blurRadius: 2,
+                              offset: Offset(1, 1),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 5.h,
-                    ),
-                    Container(
-                      height: 39.h,
-                      padding: EdgeInsets.all(3.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 1,
-                            blurRadius: 7,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
+                      SizedBox(
+                        height: 5.h,
                       ),
-                      child: _restaurantList.isNotEmpty
-                          ? Column(
-                              children: [
-                                Text(
-                                  "Restaurant Terfavorit",
-                                  style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Container(
-                                  height: 30.h,
-                                  margin: EdgeInsets.only(top: 2.h),
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: favoriteRestaurants.length,
-                                    itemBuilder: (context, index) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            PageRouteBuilder(
-                                              transitionDuration:
-                                                  Duration(seconds: 2),
-                                              pageBuilder: (BuildContext
-                                                          context,
-                                                      Animation<double>
-                                                          animation,
-                                                      Animation<double>
-                                                          secondaryAnimation) =>
-                                                  DetailPage(
-                                                      restaurant:
-                                                          favoriteRestaurants[
-                                                              index]),
-                                            ),
-                                          );
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Column(
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                child: Hero(
-                                                  tag:
-                                                      "restaurant_${favoriteRestaurants[index].id}",
-                                                  child: CachedNetworkImage(
-                                                    width: 120,
-                                                    height: 120,
-                                                    imageUrl:
-                                                        favoriteRestaurants[
-                                                                index]
-                                                            .pictureId,
-                                                    progressIndicatorBuilder:
-                                                        (context, url,
-                                                                downloadProgress) =>
-                                                            Padding(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 5.w,
-                                                              vertical: 5.w),
-                                                      child: CircularProgressIndicator(
-                                                          value:
-                                                              downloadProgress
-                                                                  .progress),
-                                                    ),
-                                                    errorWidget:
-                                                        (context, url, error) =>
-                                                            Icon(Icons.error),
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(height: 8),
-                                              Text(
-                                                favoriteRestaurants[index].name,
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              SizedBox(height: 8),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(Icons.star,
-                                                      color: Colors.amber,
-                                                      size: 16),
-                                                  SizedBox(width: 4),
-                                                  Text(
-                                                    favoriteRestaurants[index]
-                                                        .rating
-                                                        .toString(),
-                                                    style:
-                                                        TextStyle(fontSize: 14),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Center(child: CircularProgressIndicator()),
-                    ),
-                    Divider(),
-                    Text(
-                      "Mitra Kami",
-                      style: TextStyle(
-                          fontSize: 18.sp, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      height: 5.h,
-                    ),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Container(
-                        height: 60.h,
-                        child: ListView.builder(
-                          itemCount: _restaurantListFiltered.length,
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  PageRouteBuilder(
-                                      transitionDuration: Duration(seconds: 2),
-                                      pageBuilder: (BuildContext context,
-                                              Animation<double> animation,
-                                              Animation<double>
-                                                  secondaryAnimation) =>
-                                          DetailPage(
-                                              restaurant:
-                                                  _restaurantListFiltered[
-                                                      index])),
-                                );
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child: Hero(
-                                        tag:
-                                            "restaurant_${_restaurantListFiltered[index].id}",
-                                        child: CachedNetworkImage(
-                                          width: double.infinity,
-                                          height: 30.h,
-                                          imageUrl:
-                                              _restaurantListFiltered[index]
-                                                  .pictureId,
-                                          progressIndicatorBuilder: (context,
-                                                  url, downloadProgress) =>
-                                              Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 35.w,
-                                                vertical: 20.w),
-                                            child: CircularProgressIndicator(
-                                                value:
-                                                    downloadProgress.progress),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              Icon(Icons.error),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 16.0),
-                                    Text(
-                                      _restaurantListFiltered[index].name,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18.0,
-                                      ),
-                                    ),
-                                    SizedBox(height: 8.0),
-                                    // Text(
-                                    //   _restaurantListFiltered[index].description,
-                                    //   style: TextStyle(
-                                    //     fontSize: 14.0,
-                                    //     color: Colors.grey[600],
-                                    //   ),
-                                    // ),
-                                    SizedBox(height: 8.0),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.location_pin,
-                                          size: 16.0,
-                                          color: Colors.grey[600],
-                                        ),
-                                        SizedBox(width: 4.0),
-                                        Text(
-                                          _restaurantListFiltered[index].city,
-                                          style: TextStyle(
-                                            fontSize: 14.0,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                        SizedBox(width: 8.0),
-                                        Icon(
-                                          Icons.star,
-                                          size: 16.0,
-                                          color: Colors.amber,
-                                        ),
-                                        SizedBox(width: 4.0),
-                                        Text(
-                                          _restaurantListFiltered[index]
-                                              .rating
-                                              .toString(),
-                                          style: TextStyle(
-                                            fontSize: 14.0,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
+                      const Divider(),
+                      Container(
+                        decoration: ContainerDecoration.cardDecoration(),
+                        height: 40.h,
+                        width: 100.w,
+                        child: Consumer<RestaurantProvider>(
+                          builder: (BuildContext context, state, _) {
+                            if (state.state == ResultState.hasData) {
+                              return FavoritCard(
+                                  favoriteRestaurants: state.result_favorite);
+                            } else if (state.state == ResultState.error) {
+                              return Text(state.message);
+                            } else if (state.state == ResultState.loading) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else if (state.state == ResultState.noData) {
+                              return Text(state.message);
+                            } else {
+                              return Container(child: Text(""));
+                            }
                           },
                         ),
                       ),
-                    )
-                  ],
+                      const Divider(),
+                      Consumer<RestaurantProvider>(
+                        builder: (context, state, _) {
+                          if (state.state == ResultState.hasData) {
+                            return MitraCard(
+                              restaurantList: state.restaurantListFiltered,
+                            );
+                          } else if (state.state == ResultState.error) {
+                            return Text(state.message);
+                          } else if (state.state == ResultState.loading) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (state.state == ResultState.noData) {
+                            return Text(state.message);
+                          } else {
+                            return Container(child: Text(""));
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class MitraCard extends StatelessWidget {
+  List<Restaurant> restaurantList;
+  MitraCard({super.key, required this.restaurantList});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 3.h),
+      padding: EdgeInsets.all(3.w),
+      child: Column(
+        children: [
+          Text(
+            "Mitra Kami",
+            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(
+            height: 3.h,
+          ),
+          ChangeNotifierProvider<RestaurantProvider>(
+            create: (BuildContext context) {
+              return RestaurantProvider(apiService: ApiService());
+            },
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: SizedBox(
+                height: 70.h,
+                child: Consumer<RestaurantProvider>(
+                  builder: (BuildContext context, state, _) {
+                    if (state.state == ResultState.loading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state.state == ResultState.hasData) {
+                      return ListView.builder(
+                        itemCount: state.result.length,
+                        padding: const EdgeInsets.only(bottom: 10),
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                    transitionDuration:
+                                        const Duration(seconds: 2),
+                                    pageBuilder: (BuildContext context,
+                                            Animation<double> animation,
+                                            Animation<double>
+                                                secondaryAnimation) =>
+                                        DetailPage(
+                                            restaurant: state.result[index])),
+                              );
+                            },
+                            child: Container(
+                              decoration: ContainerDecoration.cardDecoration(),
+                              padding: const EdgeInsets.all(16.0),
+                              margin: const EdgeInsets.only(top: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(24.0),
+                                    child: Hero(
+                                      tag:
+                                          "restaurant_${state.result[index].id}",
+                                      child: CachedNetworkImage(
+                                        width: double.infinity,
+                                        height: 30.h,
+                                        imageUrl: state.result[index].pictureId,
+                                        progressIndicatorBuilder:
+                                            (context, url, downloadProgress) =>
+                                                Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 35.w, vertical: 20.w),
+                                          child: CircularProgressIndicator(
+                                              value: downloadProgress.progress),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16.0),
+                                  Text(
+                                    state.result[index].name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.0,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8.0),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_pin,
+                                        size: 16.0,
+                                        color: Colors.grey[600],
+                                      ),
+                                      const SizedBox(width: 4.0),
+                                      Text(
+                                        state.result[index].city,
+                                        style: TextStyle(
+                                          fontSize: 14.0,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8.0),
+                                      const Icon(
+                                        Icons.star,
+                                        size: 16.0,
+                                        color: Colors.amber,
+                                      ),
+                                      const SizedBox(width: 4.0),
+                                      Text(
+                                        state.result[index].rating.toString(),
+                                        style: TextStyle(
+                                          fontSize: 14.0,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    } else if (state.state == ResultState.noData) {
+                      return Container(
+                        child: Text(state.message),
+                      );
+                    } else if (state.state == ResultState.error) {
+                      return Container(
+                        child: Text(state.message),
+                      );
+                    } else {
+                      return Container(child: Text(""));
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FavoritCard extends StatelessWidget {
+  List<Restaurant> favoriteRestaurants;
+  FavoritCard({super.key, required this.favoriteRestaurants});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 3.h,
+        ),
+        Expanded(
+          // height: 40.h,
+          // decoration: ContainerDecoration.cardDecoration(),
+          child: favoriteRestaurants.isNotEmpty
+              ? Column(
+                  children: [
+                    Text(
+                      "Restaurant Terfavorit",
+                      style: TextStyle(
+                          fontSize: 18.sp, fontWeight: FontWeight.bold),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: favoriteRestaurants.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                  transitionDuration:
+                                      const Duration(seconds: 2),
+                                  pageBuilder: (BuildContext context,
+                                          Animation<double> animation,
+                                          Animation<double>
+                                              secondaryAnimation) =>
+                                      DetailPage(
+                                          restaurant:
+                                              favoriteRestaurants[index]),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Hero(
+                                      tag:
+                                          "restaurant_${favoriteRestaurants[index].id}",
+                                      child: CachedNetworkImage(
+                                        width: 180,
+                                        height: 140,
+                                        fit: BoxFit.cover,
+                                        imageUrl: favoriteRestaurants[index]
+                                            .pictureId,
+                                        progressIndicatorBuilder:
+                                            (context, url, downloadProgress) =>
+                                                Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 5.w, vertical: 5.w),
+                                          child: CircularProgressIndicator(
+                                              value: downloadProgress.progress),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    favoriteRestaurants[index].name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.star,
+                                          color: Colors.amber, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        favoriteRestaurants[index]
+                                            .rating
+                                            .toString(),
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                )
+              : const Center(child: CircularProgressIndicator()),
+        ),
+      ],
     );
   }
 }
