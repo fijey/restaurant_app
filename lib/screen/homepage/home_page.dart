@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage> {
         child: Stack(
           children: [
             Container(
-              height: 30.h,
+              height: 28.h,
               decoration: const BoxDecoration(
                 color: RestaurantTheme.primary,
                 borderRadius: BorderRadius.only(
@@ -46,59 +47,116 @@ class _HomePageState extends State<HomePage> {
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Container(
-                  margin: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      Text(
-                        'Selamat Datang Fajar\nLaper? Yuk Cari Tempat Makan Di Kota Terdekat Kamu!',
+                      GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            useSafeArea: true,
+                            backgroundColor: RestaurantTheme.secondary,
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (BuildContext context) {
+                              return SearchBottomSheet(
+                                textController: TextEditingController(),
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.all(16),
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(25),
+                            color: RestaurantTheme.secondary,
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Cari makanan atau restoran favoritmu!',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 3.h,
+                      ),
+                      RichText(
                         textAlign: TextAlign.start,
-                        style: RestaurantTheme.welcomeText,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Selamat Datang Fajar\n',
+                              style: RestaurantTheme.welcomeText
+                                  .copyWith(color: Colors.white),
+                            ),
+                            TextSpan(
+                              text: 'LAPER? ',
+                              style: RestaurantTheme.welcomeText,
+                            ),
+                            TextSpan(
+                              text: 'Yuk segera pilih Resto Favoritmu',
+                              style: RestaurantTheme.welcomeText
+                                  .copyWith(color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(
                         height: 1.h,
                       ),
                       const Divider(),
-                      Container(
-                        decoration: ContainerDecoration.cardDecoration(),
-                        height: 40.h,
-                        width: 100.w,
-                        child: Consumer<RestaurantProvider>(
-                          builder: (BuildContext context, state, _) {
-                            if (state.state == ResultState.hasData) {
-                              return FavoritCard(
-                                  favoriteRestaurants: state.result_favorite);
-                            } else if (state.state == ResultState.error) {
-                              return Text(state.message);
-                            } else if (state.state == ResultState.loading) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            } else if (state.state == ResultState.noData) {
-                              return Text(state.message);
-                            } else {
-                              return Container(child: Text(""));
-                            }
-                          },
-                        ),
-                      ),
-                      const Divider(),
-                      Consumer<RestaurantProvider>(
-                        builder: (context, state, _) {
-                          if (state.state == ResultState.hasData) {
-                            return MitraCard(
-                              restaurantList: state.restaurantListFiltered,
-                            );
-                          } else if (state.state == ResultState.error) {
-                            return Text(state.message);
-                          } else if (state.state == ResultState.loading) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          } else if (state.state == ResultState.noData) {
-                            return Text(state.message);
-                          } else {
-                            return Container(child: Text(""));
-                          }
-                        },
-                      ),
+                      Stack(
+                        children: [
+                          Consumer<RestaurantProvider>(
+                            builder: (context, state, _) {
+                              if (state.state == ResultState.hasData) {
+                                return MitraCard(
+                                  restaurantList: state.restaurantListFiltered,
+                                );
+                              } else if (state.state == ResultState.error) {
+                                return Text(state.message);
+                              } else if (state.state == ResultState.loading) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              } else if (state.state == ResultState.noData) {
+                                return Text(state.message);
+                              } else {
+                                return Container(child: Text(""));
+                              }
+                            },
+                          ),
+                          Container(
+                            margin: EdgeInsets.symmetric(horizontal: 4.w),
+                            decoration: ContainerDecoration.cardDecoration(),
+                            height: 41.h,
+                            width: 100.w,
+                            child: Consumer<RestaurantProvider>(
+                              builder: (BuildContext context, state, _) {
+                                if (state.state == ResultState.hasData) {
+                                  return FavoritCard(
+                                      favoriteRestaurants:
+                                          state.result_favorite);
+                                } else if (state.state == ResultState.error) {
+                                  return Text(state.message);
+                                } else if (state.state == ResultState.loading) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                } else if (state.state == ResultState.noData) {
+                                  return Text(state.message);
+                                } else {
+                                  return Container(child: Text(""));
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),
@@ -118,132 +176,149 @@ class MitraCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(top: 40.h),
+      decoration: BoxDecoration(
+          color: RestaurantTheme.primary,
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(4.h), topRight: Radius.circular(4.h))),
       padding: EdgeInsets.all(3.w),
       child: Column(
         children: [
           Text(
             "Mitra Kami",
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            style: RestaurantTheme.titleOnCard.copyWith(color: Colors.white),
           ),
           SizedBox(
-            height: 3.h,
+            height: 4.h,
           ),
           ChangeNotifierProvider<RestaurantProvider>(
             create: (BuildContext context) {
               return RestaurantProvider(apiService: ApiService());
             },
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: SizedBox(
-                height: 70.h,
-                child: Consumer<RestaurantProvider>(
-                  builder: (BuildContext context, state, _) {
-                    if (state.state == ResultState.loading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state.state == ResultState.hasData) {
-                      return ListView.builder(
-                        itemCount: state.result.length,
-                        padding: const EdgeInsets.only(bottom: 10),
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                    transitionDuration:
-                                        const Duration(seconds: 2),
-                                    pageBuilder: (BuildContext context,
-                                            Animation<double> animation,
-                                            Animation<double>
-                                                secondaryAnimation) =>
-                                        DetailPage(
-                                            restaurant: state.result[index])),
-                              );
-                            },
-                            child: Container(
-                              decoration: ContainerDecoration.cardDecoration(),
-                              padding: const EdgeInsets.all(16.0),
-                              margin: const EdgeInsets.only(top: 10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(24.0),
-                                    child: Hero(
-                                      tag:
-                                          "restaurant_${state.result[index].id}",
-                                      child: CachedNetworkImage(
-                                        width: double.infinity,
-                                        height: 30.h,
-                                        imageUrl: state.result[index].pictureId,
-                                        progressIndicatorBuilder:
-                                            (context, url, downloadProgress) =>
-                                                Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 35.w, vertical: 20.w),
-                                          child: CircularProgressIndicator(
-                                              value: downloadProgress.progress),
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(Icons.error),
+            child: SizedBox(
+              height: 70.h,
+              child: Consumer<RestaurantProvider>(
+                builder: (BuildContext context, state, _) {
+                  if (state.state == ResultState.loading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state.state == ResultState.hasData) {
+                    return ListView.builder(
+                      itemCount: state.result.length,
+                      padding: const EdgeInsets.only(bottom: 10),
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                  transitionDuration:
+                                      const Duration(seconds: 2),
+                                  pageBuilder: (BuildContext context,
+                                          Animation<double> animation,
+                                          Animation<double>
+                                              secondaryAnimation) =>
+                                      DetailPage(
+                                          restaurant: state.result[index])),
+                            );
+                          },
+                          child: Container(
+                            decoration: ContainerDecoration.cardDecoration(),
+                            padding: EdgeInsets.all(4.w),
+                            margin: EdgeInsets.only(top: 3.h),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(24.0),
+                                  child: Hero(
+                                    tag: "restaurant_${state.result[index].id}",
+                                    child: CachedNetworkImage(
+                                      width: 100.w,
+                                      height: 30.h,
+                                      imageUrl: state.result[index].pictureId,
+                                      progressIndicatorBuilder:
+                                          (context, url, downloadProgress) =>
+                                              Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 35.w, vertical: 20.w),
+                                        child: CircularProgressIndicator(
+                                            value: downloadProgress.progress),
                                       ),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
                                     ),
                                   ),
-                                  const SizedBox(height: 16.0),
-                                  Text(
-                                    state.result[index].name,
-                                    style: RestaurantTheme.titleOnCard.copyWith(
-                                        color: RestaurantTheme.primary),
-                                  ),
-                                  const SizedBox(height: 8.0),
-                                  Row(
+                                ),
+                                const SizedBox(height: 16.0),
+                                Text(
+                                  state.result[index].name,
+                                  style: RestaurantTheme.titleOnCard,
+                                ),
+                                const SizedBox(height: 8.0),
+                                Container(
+                                  padding: EdgeInsets.only(
+                                      left: 5.w,
+                                      right: 5.w,
+                                      top: 1.h,
+                                      bottom: 1.h),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(18.w),
+                                      color: RestaurantTheme.primary),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Icon(
-                                        Icons.location_pin,
-                                        size: 16.0,
-                                        color: RestaurantTheme.heading2,
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.location_pin,
+                                            size: 16.0,
+                                            color: RestaurantTheme.heading2,
+                                          ),
+                                          const SizedBox(width: 4.0),
+                                          Text(
+                                            state.result[index].city,
+                                            style: RestaurantTheme.titleOnCard,
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 4.0),
-                                      Text(
-                                        state.result[index].city,
-                                        style: RestaurantTheme.titleOnCard
-                                            .copyWith(
-                                                color: RestaurantTheme.primary),
-                                      ),
-                                      const SizedBox(width: 8.0),
-                                      const Icon(
-                                        Icons.star,
-                                        size: 16.0,
-                                        color: RestaurantTheme.heading2,
-                                      ),
-                                      const SizedBox(width: 4.0),
-                                      Text(
-                                        state.result[index].rating.toString(),
-                                        style: RestaurantTheme.titleOnCard
-                                            .copyWith(
-                                                color: RestaurantTheme.primary),
-                                      ),
+                                      Row(
+                                        children: [
+                                          const SizedBox(width: 8.0),
+                                          const Icon(
+                                            Icons.star,
+                                            size: 16.0,
+                                            color: RestaurantTheme.heading2,
+                                          ),
+                                          const SizedBox(width: 4.0),
+                                          Text(
+                                            state.result[index].rating
+                                                .toString(),
+                                            style: RestaurantTheme.titleOnCard,
+                                          ),
+                                        ],
+                                      )
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                      );
-                    } else if (state.state == ResultState.noData) {
-                      return Container(
-                        child: Text(state.message),
-                      );
-                    } else if (state.state == ResultState.error) {
-                      return Container(
-                        child: Text(state.message),
-                      );
-                    } else {
-                      return Container(child: Text(""));
-                    }
-                  },
-                ),
+                          ),
+                        );
+                      },
+                    );
+                  } else if (state.state == ResultState.noData) {
+                    return Container(
+                      child: Text(state.message),
+                    );
+                  } else if (state.state == ResultState.error) {
+                    return Container(
+                      child: Text(state.message),
+                    );
+                  } else {
+                    return Container(child: Text(""));
+                  }
+                },
               ),
             ),
           ),
@@ -295,7 +370,7 @@ class FavoritCard extends StatelessWidget {
                               );
                             },
                             child: Padding(
-                              padding: const EdgeInsets.all(16.0),
+                              padding: const EdgeInsets.all(8.0),
                               child: Column(
                                 children: [
                                   ClipRRect(
@@ -304,8 +379,8 @@ class FavoritCard extends StatelessWidget {
                                       tag:
                                           "restaurant_${favoriteRestaurants[index].id}",
                                       child: CachedNetworkImage(
-                                        width: 180,
-                                        height: 140,
+                                        width: 50.w,
+                                        height: 23.h,
                                         fit: BoxFit.cover,
                                         imageUrl: favoriteRestaurants[index]
                                             .pictureId,
@@ -327,20 +402,33 @@ class FavoritCard extends StatelessWidget {
                                       style: RestaurantTheme.titleOnCard
                                           .copyWith(fontSize: 17.sp)),
                                   const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.star,
-                                          color: Colors.amber, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        favoriteRestaurants[index]
-                                            .rating
-                                            .toString(),
-                                        style: RestaurantTheme.titleOnCard
-                                            .copyWith(fontSize: 17.sp),
-                                      ),
-                                    ],
+                                  Container(
+                                    padding: EdgeInsets.only(
+                                        left: 2.3.w,
+                                        right: 2.3.w,
+                                        top: 1.h,
+                                        bottom: 1.h),
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(18.w),
+                                        color: RestaurantTheme.primary),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          favoriteRestaurants[index]
+                                              .rating
+                                              .toString(),
+                                          style: RestaurantTheme.titleOnCard
+                                              .copyWith(fontSize: 17.sp),
+                                        ),
+                                        const Icon(Icons.star,
+                                            color: RestaurantTheme.heading2,
+                                            size: 16),
+                                        const SizedBox(width: 4),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -357,3 +445,101 @@ class FavoritCard extends StatelessWidget {
     );
   }
 }
+
+class SearchBottomSheet extends StatelessWidget {
+  final TextEditingController textController;
+
+  const SearchBottomSheet({required this.textController});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Cari Resto Favoritmu Yuk!',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Icon(Icons.close),
+              ),
+            ],
+          ),
+          TextField(
+            controller: textController,
+            decoration: InputDecoration(
+              hintText: 'Ketik nama Resto disini',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey[300],
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+              suffixIcon: Icon(Icons.search),
+            ),
+          ),
+          // Expanded(
+          //   child: ListView.builder(
+          //     itemCount: 10,
+          //     itemBuilder: (context, index) {
+          //       return ListTile(
+          //         title: Text('Result ${index + 1}'),
+          //         onTap: () {},
+          //       );
+          //     },
+          //   ),
+          // ),
+        ],
+      ),
+    );
+  }
+}
+
+
+// class SearchFieldWithAutoSubmit extends StatefulWidget {
+//   @override
+//   _SearchFieldWithAutoSubmitState createState() => _SearchFieldWithAutoSubmitState();
+// }
+
+// class _SearchFieldWithAutoSubmitState extends State<SearchFieldWithAutoSubmit> {
+//   final textController = TextEditingController();
+//   Timer _debounce;
+
+//   void _onSearchTextChanged(String text, MyProvider provider) {
+//     if (_debounce?.isActive ?? false) _debounce.cancel();
+//     _debounce = Timer(const Duration(milliseconds: 2000), () {
+//       provider.search(text);
+//     });
+//   }
+
+//   @override
+//   void dispose() {
+//     _debounce?.cancel();
+//     textController.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return TextField(
+//       controller: textController,
+//       onChanged: (text) => _onSearchTextChanged(text, context.read<MyProvider>()),
+//       decoration: InputDecoration(
+//         hintText: 'Ketik nama Resto disini',
+//         border: OutlineInputBorder(),
+//         suffixIcon: Icon(Icons.search),
+//       ),
+//     );
+//   }
+// }
+

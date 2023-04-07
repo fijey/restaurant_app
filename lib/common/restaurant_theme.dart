@@ -28,7 +28,7 @@ class RestaurantTheme {
   static TextStyle titleOnCard = TextStyle(
     fontSize: 18.sp,
     fontWeight: FontWeight.bold,
-    color: heading2,
+    color: Colors.white,
   );
 
   static TextStyle styleHeadingPrimary = TextStyle(
