@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:restaurant_app/common/card_decoration.dart';
+import 'package:restaurant_app/common/restaurant_theme.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/data/model/restaurant_model.dart';
 import 'package:restaurant_app/data/provider/restaurant_provider.dart';
 import 'package:restaurant_app/screen/detail/detail_page.dart';
-import 'package:restaurant_app/screen/homepage/controller/controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,27 +19,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<dynamic> _restaurantList = [];
-  final List<dynamic> _restaurantFavorite = [];
-  HomeController controller = HomeController();
-
   @override
   void initState() {
     super.initState();
-    _getData();
-  }
-
-  Future<void> _getData() async {
-    if (mounted) {
-      String jsonRestaurantData = await controller.loadRestaurants();
-      setState(() {
-        _restaurantList = json
-            .decode(jsonRestaurantData)['restaurants']
-            .map((restaurant) =>
-                Restaurant.fromJson(restaurant as Map<String, dynamic>))
-            .toList();
-      });
-    }
   }
 
   @override
@@ -50,9 +32,9 @@ class _HomePageState extends State<HomePage> {
         child: Stack(
           children: [
             Container(
-              height: 20.h,
+              height: 30.h,
               decoration: const BoxDecoration(
-                color: Colors.orange,
+                color: RestaurantTheme.primary,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(50),
                   bottomRight: Radius.circular(50),
@@ -67,25 +49,13 @@ class _HomePageState extends State<HomePage> {
                   margin: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      const Text(
-                        'Selamat Datang Fajar',
+                      Text(
+                        'Selamat Datang Fajar\nLaper? Yuk Cari Tempat Makan Di Kota Terdekat Kamu!',
                         textAlign: TextAlign.start,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(255, 255, 255, 255),
-                          fontStyle: FontStyle.italic,
-                          shadows: [
-                            Shadow(
-                              color: Colors.grey,
-                              blurRadius: 2,
-                              offset: Offset(1, 1),
-                            ),
-                          ],
-                        ),
+                        style: RestaurantTheme.welcomeText,
                       ),
                       SizedBox(
-                        height: 5.h,
+                        height: 1.h,
                       ),
                       const Divider(),
                       Container(
@@ -148,13 +118,12 @@ class MitraCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 3.h),
       padding: EdgeInsets.all(3.w),
       child: Column(
         children: [
           Text(
             "Mitra Kami",
-            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(
             height: 3.h,
@@ -223,40 +192,36 @@ class MitraCard extends StatelessWidget {
                                   const SizedBox(height: 16.0),
                                   Text(
                                     state.result[index].name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18.0,
-                                    ),
+                                    style: RestaurantTheme.titleOnCard.copyWith(
+                                        color: RestaurantTheme.primary),
                                   ),
                                   const SizedBox(height: 8.0),
                                   Row(
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.location_pin,
                                         size: 16.0,
-                                        color: Colors.grey[600],
+                                        color: RestaurantTheme.heading2,
                                       ),
                                       const SizedBox(width: 4.0),
                                       Text(
                                         state.result[index].city,
-                                        style: TextStyle(
-                                          fontSize: 14.0,
-                                          color: Colors.grey[600],
-                                        ),
+                                        style: RestaurantTheme.titleOnCard
+                                            .copyWith(
+                                                color: RestaurantTheme.primary),
                                       ),
                                       const SizedBox(width: 8.0),
                                       const Icon(
                                         Icons.star,
                                         size: 16.0,
-                                        color: Colors.amber,
+                                        color: RestaurantTheme.heading2,
                                       ),
                                       const SizedBox(width: 4.0),
                                       Text(
                                         state.result[index].rating.toString(),
-                                        style: TextStyle(
-                                          fontSize: 14.0,
-                                          color: Colors.grey[600],
-                                        ),
+                                        style: RestaurantTheme.titleOnCard
+                                            .copyWith(
+                                                color: RestaurantTheme.primary),
                                       ),
                                     ],
                                   ),
@@ -305,11 +270,8 @@ class FavoritCard extends StatelessWidget {
           child: favoriteRestaurants.isNotEmpty
               ? Column(
                   children: [
-                    Text(
-                      "Restaurant Terfavorit",
-                      style: TextStyle(
-                          fontSize: 18.sp, fontWeight: FontWeight.bold),
-                    ),
+                    Text("Restaurant Terfavorit",
+                        style: RestaurantTheme.titleOnCard),
                     Expanded(
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
@@ -361,14 +323,9 @@ class FavoritCard extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(
-                                    favoriteRestaurants[index].name,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  Text(favoriteRestaurants[index].name,
+                                      style: RestaurantTheme.titleOnCard
+                                          .copyWith(fontSize: 17.sp)),
                                   const SizedBox(height: 8),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -380,7 +337,8 @@ class FavoritCard extends StatelessWidget {
                                         favoriteRestaurants[index]
                                             .rating
                                             .toString(),
-                                        style: const TextStyle(fontSize: 14),
+                                        style: RestaurantTheme.titleOnCard
+                                            .copyWith(fontSize: 17.sp),
                                       ),
                                     ],
                                   ),

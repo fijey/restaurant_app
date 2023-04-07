@@ -1,3 +1,5 @@
+import 'package:restaurant_app/data/model/customer_reviews.dart';
+
 class Restaurant {
   final String id;
   final String name;
@@ -7,6 +9,8 @@ class Restaurant {
   final double rating;
   final List<dynamic> menus;
   final List<dynamic> drinks;
+  final String category;
+  final List<CustomerReviewsElement> review;
 
   Restaurant({
     required this.id,
@@ -17,29 +21,35 @@ class Restaurant {
     required this.rating,
     required this.menus,
     required this.drinks,
+    required this.category,
+    required this.review,
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> menus = json['menus'] ?? {};
 
-    var foods = menus.containsKey('foods')
-        ? menus['foods'].map((key) => key['name'] as String).toList()
-        : [];
+    var foods =
+        menus['foods']?.map((key) => key['name'] as String).toList() ?? [];
 
-    var drinks = menus.containsKey('drinks')
-        ? menus['drinks'].map((key) => key['name'] as String).toList()
-        : [];
+    var drinks =
+        menus['drinks']?.map((key) => key['name'] as String).toList() ?? [];
+
+    var customerReview = json['customerReviews'] ?? [];
 
     return Restaurant(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
+      id: json['id'] ?? "",
+      name: json['name'] ?? "",
+      description: json['description'] ?? "",
       pictureId:
-          "https://restaurant-api.dicoding.dev/images/medium/${json['pictureId'] as String}",
-      city: json['city'] as String,
-      rating: (json['rating'] as num).toDouble(),
-      menus: foods,
-      drinks: drinks,
+          "https://restaurant-api.dicoding.dev/images/medium/${json['pictureId'] ?? ""}",
+      city: json['city'] ?? "",
+      rating: (json['rating'] ?? 0).toDouble(),
+      menus: foods as List,
+      drinks: drinks as List,
+      category: json['category'] ?? "",
+      review: (customerReview as List)
+          .map((review) => CustomerReviewsElement.fromJson(review))
+          .toList(),
     );
   }
 }
