@@ -22,9 +22,25 @@ class ApiService {
   }
 
   Future<Restaurant> getDetailRestaurant(String id) async {
-    final response = await http.get(Uri.parse("${_baseUrl}detail/${id}"));
+    final response = await http.get(Uri.parse("${_baseUrl}detail/$id"));
     if (response.statusCode == 200) {
       return Restaurant.fromJson(json.decode(response.body)['restaurant']);
+    } else {
+      throw Exception('Failed to load Retsaurant List');
+    }
+  }
+
+  Future<List<dynamic>> searchRestaurant(query) async {
+    final response = await http.get(Uri.parse("${_baseUrl}search?q=$query"));
+    if (response.statusCode == 200) {
+      List<dynamic> listRestaurant = json
+          .decode(response.body)['restaurants']
+          .map((restaurant) =>
+              Restaurant.fromJson(restaurant as Map<String, dynamic>))
+          .toList();
+
+      return listRestaurant;
+      // return Restaurant.fromJson(json.decode(response.body)['restaurants']);
     } else {
       throw Exception('Failed to load Retsaurant List');
     }

@@ -2,7 +2,6 @@
 //
 //     final customerReviews = customerReviewsFromJson(jsonString);
 
-import 'package:meta/meta.dart';
 import 'dart:convert';
 
 CustomerReviews customerReviewsFromJson(String str) =>

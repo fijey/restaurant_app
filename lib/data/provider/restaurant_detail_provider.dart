@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/data/model/restaurant_model.dart';
 
-enum ResultState { loading, noData, hasData, error }
+enum ResultStateDetail { loading, noData, hasData, error }
 
 class RestaurantDetailProvider extends ChangeNotifier {
   final ApiService apiService;
@@ -13,25 +13,25 @@ class RestaurantDetailProvider extends ChangeNotifier {
   }
 
   late Restaurant _data;
-  late ResultState _state;
+  late ResultStateDetail _state;
 
   String _message = '';
   String get message => _message;
   Restaurant get result => _data;
 
-  ResultState get state => _state;
+  ResultStateDetail get state => _state;
 
   Future<dynamic> _fetchRestaurantDetail() async {
     try {
-      _state = ResultState.loading;
+      _state = ResultStateDetail.loading;
       notifyListeners();
       final restaurant = await apiService.getDetailRestaurant(id);
       if (restaurant == null.toString()) {
-        _state = ResultState.noData;
+        _state = ResultStateDetail.noData;
         notifyListeners();
         return _message = 'Empty Data';
       } else {
-        _state = ResultState.hasData;
+        _state = ResultStateDetail.hasData;
         notifyListeners();
 
         _data = restaurant;
@@ -39,7 +39,7 @@ class RestaurantDetailProvider extends ChangeNotifier {
         return;
       }
     } catch (e) {
-      _state = ResultState.error;
+      _state = ResultStateDetail.error;
       notifyListeners();
       return _message = 'Error --> $e';
     }

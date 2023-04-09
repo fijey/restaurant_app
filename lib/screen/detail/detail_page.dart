@@ -122,7 +122,7 @@ class DetailCard extends StatelessWidget {
                   height: 100,
                   child: Consumer<RestaurantDetailProvider>(
                     builder: (context, state, _) {
-                      if (state.state == ResultState.hasData) {
+                      if (state.state == ResultStateDetail.hasData) {
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: state.result.menus.length,
@@ -158,11 +158,11 @@ class DetailCard extends StatelessWidget {
                             );
                           },
                         );
-                      } else if (state.state == ResultState.loading) {
-                        return Center(
+                      } else if (state.state == ResultStateDetail.loading) {
+                        return const Center(
                           child: CircularProgressIndicator(),
                         );
-                      } else if (state.state == ResultState.error) {
+                      } else if (state.state == ResultStateDetail.error) {
                         return Text(state.message);
                       } else {
                         return Container();
@@ -183,7 +183,7 @@ class DetailCard extends StatelessWidget {
                   height: 100,
                   child: Consumer<RestaurantDetailProvider>(
                     builder: (context, state, _) {
-                      if (state.state == ResultState.hasData) {
+                      if (state.state == ResultStateDetail.hasData) {
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: state.result.drinks.length,
@@ -219,11 +219,11 @@ class DetailCard extends StatelessWidget {
                             );
                           },
                         );
-                      } else if (state.state == ResultState.loading) {
-                        return Center(
+                      } else if (state.state == ResultStateDetail.loading) {
+                        return const Center(
                           child: CircularProgressIndicator(),
                         );
-                      } else if (state.state == ResultState.error) {
+                      } else if (state.state == ResultStateDetail.error) {
                         return Text(state.message);
                       } else {
                         return Container();
@@ -233,9 +233,9 @@ class DetailCard extends StatelessWidget {
                 ),
                 Consumer<RestaurantDetailProvider>(
                   builder: (context, state, _) {
-                    if (state.state == ResultState.hasData) {
-                      return Container(
-                        height: 50.h,
+                    if (state.state == ResultStateDetail.hasData) {
+                      return SizedBox(
+                        height: 46.h,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -243,9 +243,9 @@ class DetailCard extends StatelessWidget {
                               'Customer Reviews',
                               style: RestaurantTheme.styleHeadingPrimary,
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             Expanded(
-                              child: Container(
+                              child: SizedBox(
                                 height: 500,
                                 child: ListView.builder(
                                   itemCount: state.result.review.length,
@@ -262,17 +262,18 @@ class DetailCard extends StatelessWidget {
                           ],
                         ),
                       );
-                    } else if (state.state == ResultState.loading) {
-                      return Center(
+                    } else if (state.state == ResultStateDetail.loading) {
+                      return const Center(
                         child: CircularProgressIndicator(),
                       );
-                    } else if (state.state == ResultState.error) {
+                    } else if (state.state == ResultStateDetail.error) {
                       return Text(state.message);
                     } else {
                       return Container();
                     }
                   },
                 ),
+                const ReviewForm(),
               ],
             ),
           ),
@@ -333,6 +334,94 @@ class CustomerReviewWidget extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ReviewForm extends StatefulWidget {
+  const ReviewForm({super.key});
+
+  @override
+  _ReviewFormState createState() => _ReviewFormState();
+}
+
+class _ReviewFormState extends State<ReviewForm> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _reviewController = TextEditingController();
+  final double _rating = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.w),
+      ),
+      child: Column(
+        children: [
+          Text('Berikan Review', style: RestaurantTheme.styleHeadingPrimary),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nama',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Nama harus diisi';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _reviewController,
+                    decoration: const InputDecoration(
+                      labelText: 'Review',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Review harus diisi';
+                      }
+                      return null;
+                    },
+                    maxLines: 5,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateColor.resolveWith(
+                        (states) => RestaurantTheme.primary,
+                      ),
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        // Send review
+                        String name = _nameController.text;
+                        String review = _reviewController.text;
+                        double rating = _rating;
+                        // Provider.of<RestaurantProvider>(context, listen: false)
+                        //     .addReview(name, review, rating);
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    child: const Text('Kirim'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

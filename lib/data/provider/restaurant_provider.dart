@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/common/common_function.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
@@ -29,10 +31,11 @@ class RestaurantProvider extends ChangeNotifier {
       _state = ResultState.loading;
       notifyListeners();
       final restaurant = await apiService.getListRestaurant();
+      // final restaurant = [];
       if (restaurant.isEmpty) {
         _state = ResultState.noData;
         notifyListeners();
-        return _message = 'Empty Data';
+        return _message = 'Data Restaurant Tidak Tersedia';
       } else {
         _state = ResultState.hasData;
         notifyListeners();
@@ -48,6 +51,11 @@ class RestaurantProvider extends ChangeNotifier {
 
         _restaurant = restaurantListFiltered;
       }
+    } on SocketException catch (_) {
+      // kode untuk menampilkan pesan error atau widget khusus
+      _state = ResultState.error;
+      notifyListeners();
+      return _message = 'Tidak Ada Koneksi Internet';
     } catch (e) {
       _state = ResultState.error;
       notifyListeners();

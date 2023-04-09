@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import 'package:restaurant_app/common/restaurant_theme.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/data/model/restaurant_model.dart';
 import 'package:restaurant_app/data/provider/restaurant_provider.dart';
+import 'package:restaurant_app/data/provider/restaurant_search_provider.dart';
 import 'package:restaurant_app/screen/detail/detail_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -120,14 +120,18 @@ class _HomePageState extends State<HomePage> {
                                   restaurantList: state.restaurantListFiltered,
                                 );
                               } else if (state.state == ResultState.error) {
-                                return Text(state.message);
+                                return Container(
+                                    margin: EdgeInsets.only(top: 55.h),
+                                    child: Center(child: Text(state.message)));
                               } else if (state.state == ResultState.loading) {
                                 return const Center(
                                     child: CircularProgressIndicator());
                               } else if (state.state == ResultState.noData) {
-                                return Text(state.message);
+                                return Container(
+                                    margin: EdgeInsets.only(top: 55.h),
+                                    child: Center(child: Text(state.message)));
                               } else {
-                                return Container(child: Text(""));
+                                return const Text("");
                               }
                             },
                           ),
@@ -143,14 +147,17 @@ class _HomePageState extends State<HomePage> {
                                       favoriteRestaurants:
                                           state.result_favorite);
                                 } else if (state.state == ResultState.error) {
-                                  return Text(state.message);
+                                  return Container(
+                                      margin: EdgeInsets.only(top: 55.h),
+                                      child:
+                                          Center(child: Text(state.message)));
                                 } else if (state.state == ResultState.loading) {
                                   return const Center(
                                       child: CircularProgressIndicator());
                                 } else if (state.state == ResultState.noData) {
-                                  return Text(state.message);
+                                  return Center(child: Text(state.message));
                                 } else {
-                                  return Container(child: Text(""));
+                                  return Container(child: const Text(""));
                                 }
                               },
                             ),
@@ -176,16 +183,16 @@ class MitraCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.only(top: 5.h, left: 4.h, right: 4.h),
       margin: EdgeInsets.only(top: 40.h),
       decoration: BoxDecoration(
           color: RestaurantTheme.primary,
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(4.h), topRight: Radius.circular(4.h))),
-      padding: EdgeInsets.all(3.w),
       child: Column(
         children: [
           Text(
-            "Mitra Kami",
+            "Restaurant Yang Mungkin Kamu Suka",
             style: RestaurantTheme.titleOnCard.copyWith(color: Colors.white),
           ),
           SizedBox(
@@ -316,7 +323,7 @@ class MitraCard extends StatelessWidget {
                       child: Text(state.message),
                     );
                   } else {
-                    return Container(child: Text(""));
+                    return Container(child: const Text(""));
                   }
                 },
               ),
@@ -446,15 +453,29 @@ class FavoritCard extends StatelessWidget {
   }
 }
 
-class SearchBottomSheet extends StatelessWidget {
+class SearchBottomSheet extends StatefulWidget {
   final TextEditingController textController;
 
-  const SearchBottomSheet({required this.textController});
+  const SearchBottomSheet({super.key, required this.textController});
+
+  @override
+  _SearchBottomSheetState createState() => _SearchBottomSheetState();
+}
+
+class _SearchBottomSheetState extends State<SearchBottomSheet> {
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    // Clear the timer when the widget is disposed
+    _debounce?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Row(
@@ -462,19 +483,17 @@ class SearchBottomSheet extends StatelessWidget {
             children: [
               Text(
                 'Cari Resto Favoritmu Yuk!',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style:
+                    RestaurantTheme.titleOnCard.copyWith(color: Colors.white),
               ),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(Icons.close),
+                icon: const Icon(Icons.close),
               ),
             ],
           ),
           TextField(
-            controller: textController,
+            controller: widget.textController,
             decoration: InputDecoration(
               hintText: 'Ketik nama Resto disini',
               border: OutlineInputBorder(
@@ -484,62 +503,133 @@ class SearchBottomSheet extends StatelessWidget {
               filled: true,
               fillColor: Colors.grey[300],
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-              suffixIcon: Icon(Icons.search),
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+              suffixIcon: const Icon(Icons.search),
             ),
+            onChanged: (value) {
+              // Clear the timer and start a new one when the user types
+              _debounce?.cancel();
+              _debounce = Timer(const Duration(seconds: 2), () {
+                final restaurantSearchProvider =
+                    Provider.of<RestaurantSearchProvider>(context,
+                        listen: false);
+                restaurantSearchProvider.searchRestaurant(query: value);
+              });
+            },
           ),
-          // Expanded(
-          //   child: ListView.builder(
-          //     itemCount: 10,
-          //     itemBuilder: (context, index) {
-          //       return ListTile(
-          //         title: Text('Result ${index + 1}'),
-          //         onTap: () {},
-          //       );
-          //     },
-          //   ),
-          // ),
+          Consumer<RestaurantSearchProvider>(
+            builder: (context, state, child) {
+              if (state.state == ResultStateSearch.hasData) {
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: state.result.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                  transitionDuration:
+                                      const Duration(seconds: 2),
+                                  pageBuilder: (BuildContext context,
+                                          Animation<double> animation,
+                                          Animation<double>
+                                              secondaryAnimation) =>
+                                      DetailPage(
+                                          restaurant: state.result[index])));
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(3.w),
+                          decoration: BoxDecoration(
+                              color: RestaurantTheme.primary,
+                              borderRadius: BorderRadius.circular(5.w)),
+                          margin: EdgeInsets.only(top: 4.h),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                height: 80,
+                                width: 80,
+                                child: ClipOval(
+                                  child: Hero(
+                                    tag: "restaurant_${state.result[index].id}",
+                                    child: CachedNetworkImage(
+                                      width: 20.w,
+                                      height: 20.h,
+                                      fit: BoxFit.cover,
+                                      imageUrl: state.result[index].pictureId,
+                                      progressIndicatorBuilder:
+                                          (context, url, downloadProgress) =>
+                                              Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 35.w, vertical: 20.w),
+                                        child: CircularProgressIndicator(
+                                            value: downloadProgress.progress),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(state.result[index].name,
+                                        style: RestaurantTheme.titleOnCard),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.location_on,
+                                          size: 16,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          state.result[index].city,
+                                          style: RestaurantTheme.titleOnCard,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.star,
+                                            size: 16, color: Colors.amber),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          state.result[index].rating.toString(),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.amber,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              } else if (state.state == ResultStateSearch.error) {
+                return Container(
+                  margin: EdgeInsets.only(top: 30.h),
+                  child: Center(child: Text(state.message)),
+                );
+              } else {
+                return Container();
+              }
+            },
+          ),
         ],
       ),
     );
   }
 }
-
-
-// class SearchFieldWithAutoSubmit extends StatefulWidget {
-//   @override
-//   _SearchFieldWithAutoSubmitState createState() => _SearchFieldWithAutoSubmitState();
-// }
-
-// class _SearchFieldWithAutoSubmitState extends State<SearchFieldWithAutoSubmit> {
-//   final textController = TextEditingController();
-//   Timer _debounce;
-
-//   void _onSearchTextChanged(String text, MyProvider provider) {
-//     if (_debounce?.isActive ?? false) _debounce.cancel();
-//     _debounce = Timer(const Duration(milliseconds: 2000), () {
-//       provider.search(text);
-//     });
-//   }
-
-//   @override
-//   void dispose() {
-//     _debounce?.cancel();
-//     textController.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return TextField(
-//       controller: textController,
-//       onChanged: (text) => _onSearchTextChanged(text, context.read<MyProvider>()),
-//       decoration: InputDecoration(
-//         hintText: 'Ketik nama Resto disini',
-//         border: OutlineInputBorder(),
-//         suffixIcon: Icon(Icons.search),
-//       ),
-//     );
-//   }
-// }
-
