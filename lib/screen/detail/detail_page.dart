@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:restaurant_app/common/restaurant_theme.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/data/model/restaurant_model.dart';
+import 'package:restaurant_app/data/provider/add_review_provider.dart';
 import 'package:restaurant_app/data/provider/restaurant_detail_provider.dart';
 
 class DetailPage extends StatelessWidget {
@@ -273,7 +275,18 @@ class DetailCard extends StatelessWidget {
                     }
                   },
                 ),
-                const ReviewForm(),
+                Consumer<AddReviewProvier>(
+                  builder: (context, state, _) {
+                    Provider.of<RestaurantDetailProvider>(context,
+                            listen: false)
+                        .fetchRestaurantDetail();
+
+                    return Container();
+                  },
+                ),
+                ReviewForm(
+                  id: restaurant.id,
+                )
               ],
             ),
           ),
@@ -340,7 +353,11 @@ class CustomerReviewWidget extends StatelessWidget {
 }
 
 class ReviewForm extends StatefulWidget {
-  const ReviewForm({super.key});
+  final String id;
+  const ReviewForm({
+    Key? key,
+    required this.id,
+  }) : super(key: key);
 
   @override
   _ReviewFormState createState() => _ReviewFormState();
@@ -348,9 +365,17 @@ class ReviewForm extends StatefulWidget {
 
 class _ReviewFormState extends State<ReviewForm> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _IdRestaurant = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _reviewController = TextEditingController();
   final double _rating = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _IdRestaurant.text = widget.id;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -407,12 +432,23 @@ class _ReviewFormState extends State<ReviewForm> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         // Send review
+                        String idrestaurant = _IdRestaurant.text;
                         String name = _nameController.text;
                         String review = _reviewController.text;
                         double rating = _rating;
-                        // Provider.of<RestaurantProvider>(context, listen: false)
-                        //     .addReview(name, review, rating);
-                        Navigator.of(context).pop();
+                        Provider.of<AddReviewProvier>(context, listen: false)
+                            .addReview(
+                                idRestaurant: idrestaurant,
+                                name: name,
+                                message: review);
+                        _nameController.text = "";
+                        _reviewController.text = "";
+
+                        QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.success,
+                            title: "SUKSES",
+                            text: "REVIEW BARU BERHASIL DITAMBAHKAN");
                       }
                     },
                     child: const Text('Kirim'),

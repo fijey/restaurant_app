@@ -21,6 +21,30 @@ class ApiService {
     }
   }
 
+  Future<List<dynamic>> addReview(
+      {required String id,
+      required String name,
+      required String review}) async {
+    final url = Uri.parse("$_baseUrl/review");
+    final body = json.encode({
+      'id': id,
+      'name': name,
+      'review': review,
+    });
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+
+    if (json.decode(response.body)['error'] == false) {
+      return [];
+      // return Restaurant.fromJson(json.decode(response.body)['restaurants']);
+    } else {
+      throw Exception('Failed to load Retsaurant List');
+    }
+  }
+
   Future<Restaurant> getDetailRestaurant(String id) async {
     final response = await http.get(Uri.parse("${_baseUrl}detail/$id"));
     if (response.statusCode == 200) {

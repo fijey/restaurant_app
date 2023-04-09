@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
+import 'package:restaurant_app/data/provider/add_review_provider.dart';
 import 'package:restaurant_app/data/provider/restaurant_search_provider.dart';
 import 'package:restaurant_app/screen/splash_screen.dart';
 
@@ -23,6 +24,9 @@ class MyApp extends StatelessWidget {
               create: (context) =>
                   RestaurantSearchProvider(apiService: ApiService(), query: ""),
             ),
+            ChangeNotifierProvider<AddReviewProvier>(
+                create: (context) =>
+                    AddReviewProvier(apiService: ApiService())),
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
